@@ -1,257 +1,305 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Number to Words Conversion (remains unchanged)
-    function ConvertNumberToWords(number) {
-        const belowTwenty = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
-        const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
-        const thousands = ["", "Thousand", "Lakh", "Crore"];
+function ConvertNumberToWords(num) {
+    if (num === 0) return "zero";
 
-        if (number === 0) return "Zero";
-        if (isNaN(number)) return "Invalid number";
+    const belowTwenty = [
+        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+        "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
+        "seventeen", "eighteen", "nineteen"
+    ];
+    const tens = [
+        "", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy",
+        "eighty", "ninety"
+    ];
+    const places = ["", "thousand", "lakh", "crore"];
 
-        let numStr = parseFloat(number).toFixed(2).toString(); // Ensure two decimal places for paisa
-        let words = "";
+    function helper(n) {
+        if (n === 0) return "";
+        else if (n < 20) return belowTwenty[n - 1] + " ";
+        else if (n < 100) return tens[Math.floor(n / 10)] + " " + helper(n % 10);
+        else return belowTwenty[Math.floor(n / 100) - 1] + " hundred " + (n % 100 !== 0 ? "and " : "") + helper(n % 100);
+    }
 
-        let [integerPartStr, decimalPartStr] = numStr.split(".");
-        let integerPart = parseInt(integerPartStr);
-        let decimalPart = parseInt(decimalPartStr);
+    let integerPart = Math.floor(num); // Integer part
+    let decimalPart = num % 1; // Decimal part
+    let word = "";
+    let i = 0;
 
-        words = convertIntegerPart(integerPart) + " Rupees";
-
-        if (decimalPart > 0) {
-            words += " and " + convertIntegerPart(decimalPart) + " Paisa"; // Use convertIntegerPart for paisa too
+    // Handle integer part
+    while (integerPart > 0) {
+        let chunk = integerPart % (i === 0 ? 1000 : 100);
+        if (chunk !== 0) {
+            word = helper(chunk) + places[i] + " " + word;
         }
-        return words + " Only";
+        integerPart = Math.floor(integerPart / (i === 0 ? 1000 : 100));
+        i++;
+    }
 
-        function convertIntegerPart(num) {
-            if (num === 0) return "Zero";
-            let numAsStr = num.toString();
-            let result = "";
-            
-            if (numAsStr.length > 7) { // Crore
-                result += convertHundreds(numAsStr.slice(0, -7)) + " Crore ";
-                numAsStr = numAsStr.slice(-7);
-            }
-            if (numAsStr.length > 5) { // Lakh
-                result += convertHundreds(numAsStr.slice(0, -5)) + " Lakh ";
-                numAsStr = numAsStr.slice(-5);
-            }
-            if (numAsStr.length > 3) { // Thousand
-                result += convertHundreds(numAsStr.slice(0, -3)) + " Thousand ";
-                numAsStr = numAsStr.slice(-3);
-            }
-            result += convertHundreds(numAsStr);
-            return result.trim();
+    word = word.trim();
+
+    // Handle decimal part
+    if (decimalPart > 0) {
+        let decimalWords = "point ";
+        const decimals = decimalPart.toString().split(".")[1]; // Get digits after the decimal point
+        for (let digit of decimals) {
+            decimalWords += belowTwenty[parseInt(digit) - 1] + " "; // Convert digits to words
         }
+        word += " " + decimalWords.trim();
+    }
 
-        function convertHundreds(numStr) {
-            let num = parseInt(numStr);
-            if (num === 0) return "";
-            let tempWords = "";
-            if (num >= 100) {
-                tempWords += belowTwenty[Math.floor(num / 100)] + " Hundred ";
-                num %= 100;
-            }
-            if (num > 0) {
-                if (num < 20) {
-                    tempWords += belowTwenty[num] + " ";
-                } else {
-                    tempWords += tens[Math.floor(num / 10)] + " ";
-                    if (num % 10 > 0) {
-                        tempWords += belowTwenty[num % 10] + " ";
+    return word.trim();
+}
+
+function printInvoice(e) {
+    const viewPreviousInvoicesBtn = document.getElementById("view_previous_invoices_btn");
+    if (viewPreviousInvoicesBtn) {
+        viewPreviousInvoicesBtn.style.display = "none"; // Hide the button
+    }
+
+    document.body.classList.add("print");
+    const sample_form = document.getElementById('sample_form'); // Corrected
+    sample_form.classList.add("hidden");
+    let el = document.getElementById("main_formm");
+    el.classList.remove("hidden");
+
+    html2pdf(el, {
+        filename: 'MS#' + e + '.pdf', // Corrected
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        html2canvas: { scale: 2 }
+    }).then(function() {
+        // Restore button visibility after PDF generation is complete or initiated
+        if (viewPreviousInvoicesBtn) {
+            viewPreviousInvoicesBtn.style.display = "inline-block";
+        }
+    }).catch(function(error) {
+        console.error("Error generating PDF: ", error);
+        // Ensure button is restored even if PDF generation fails
+        if (viewPreviousInvoicesBtn) {
+            viewPreviousInvoicesBtn.style.display = "inline-block";
+        }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", async function () {
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxAd4ZF3BfZcRomueGzf7QciFu2B6QKi_Rsn8Dld0zdLG7gOb4-vsAxLRzGFg1BuU-FcA/exec';
+    const form = document.forms['google-sheet'];
+    const submit = document.getElementById('but');
+    submit.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const form_main = document.getElementById('form_main');
+        form_main.classList.remove("hidden");
+
+        const sample_form = document.getElementById('sample_form');
+        var x = document.getElementById('date_input').value.split('-');
+
+        const date_output = document.getElementById('date_output');
+        date_output.textContent = x[2] + '/' + x[1] + '/' + x[0];
+
+        const val = document.getElementById('gstinput');
+        const half_gst = document.querySelectorAll(".gst");
+        const mainval = parseFloat(val.value);
+        const without_gst = (parseFloat((mainval / 1.05).toFixed(2)));
+        const gst = parseFloat((mainval - without_gst).toFixed(2)) / 2;
+        const full_value = parseFloat(2 * gst + without_gst).toFixed(2);
+        const tgst = document.getElementById('tgst');
+        tgst.textContent = `${2 * gst}`;
+        const basic_value = document.querySelectorAll('.basic_value');
+        basic_value.forEach(function (el_val) { // Changed variable name e to el_val to avoid conflict
+            el_val.textContent = `${without_gst}`;
+        });
+        half_gst.forEach(function (element) {
+            element.textContent = `${gst}`;
+        });
+
+        const main_with_gst_value = document.getElementById('main_with_gst_value');
+        main_with_gst_value.textContent = `${full_value}`;
+
+        const rounded = document.getElementById('rounded');
+        const rounded_value = (mainval - full_value).toFixed(2);
+        rounded.textContent = `${rounded_value}`;
+
+        const car_details_input = document.getElementById('car_details_input').value;
+        const car_details = document.getElementById('car_details');
+        car_details.innerText = car_details_input.toUpperCase();
+
+
+        const otherDetails = document.getElementById("car_details_input2").value;
+        document.getElementById("other_output").innerText = otherDetails.toUpperCase();
+
+        const color_input = document.getElementById('color_input').value;
+        const color = document.getElementById('color');
+        color.textContent = `${color_input.toUpperCase()} COLOUR`;
+        const ch_input = document.getElementById('ch_input').value;
+        const ch_output = document.getElementById('ch_output');
+        ch_output.textContent = `${ch_input.toUpperCase()}`;
+        const quantity_input = document.getElementById('quantity_input').value;
+        const quantity_output = document.getElementById('quantity_output')
+        quantity_output.textContent = `${quantity_input} NOS`;
+
+        const word = ConvertNumberToWords(mainval);
+        const amount_word = document.getElementById('amount_word');
+        amount_word.textContent = `${word.toUpperCase()} ONLY.`;
+
+        const basicword = document.getElementById('basicword');
+        let gh = without_gst;
+        let beforePoint = Math.floor(gh);
+        let afterPoint = Math.round((gh - beforePoint) * 100);
+        const a = ConvertNumberToWords(beforePoint);
+        const b = ConvertNumberToWords(afterPoint);
+        const basword = `${a}` + ' AND ' + `${b}`;
+        basicword.textContent = `${basword.toUpperCase()} PAISA ONLY`;
+
+
+
+        const biller_name_input = document.getElementById('biller_name_input');
+        const biller_name_value = biller_name_input.value;
+
+        const spanBillerName = document.getElementById('biller_name');
+        spanBillerName.textContent = `${biller_name_value.toUpperCase()}`;
+
+        const city_name_input_val = document.getElementById('city').value;
+        const PS_input_val = document.getElementById('P.S').value;
+        const PO_input_val = document.getElementById('P.O').value;
+        const dist_input_val = document.getElementById('dist').value;
+        const pincode_input_val = document.getElementById('pincode').value;
+        const invoice_input_val = document.getElementById('invoice').value;
+
+
+        const city_output = document.getElementById('city_output');
+        city_output.textContent = `${city_name_input_val.toUpperCase()} , ${PS_input_val.toUpperCase()} ,${PO_input_val.toUpperCase()}`;
+        const dist_output = document.getElementById('dist_output');
+        dist_output.textContent = `${dist_input_val.toUpperCase()} , WEST BENGAL`;
+        const pincode_output = document.getElementById('pincode_output');
+        pincode_output.textContent = `${pincode_input_val}`;
+        const invoice_bill = document.getElementById('invoice_bill');
+        invoice_bill.textContent = `${invoice_input_val}`;
+        const gst_name_input = document.getElementById('gst_name_input').value;
+        const gst_output = document.getElementById('gstname');
+        gst_output.textContent = `${gst_name_input.toUpperCase()}`;
+
+
+        const biller_number_input_val = document.getElementById('biller_number_input').value;
+        const biller_aadhar_input_val = document.getElementById('biller_aadhar_input').value;
+
+        const aadhar_output = document.getElementById('aadhar_output');
+        aadhar_output.textContent = `${biller_aadhar_input_val}`;
+
+        const number_output = document.getElementById('number_output');
+        number_output.textContent = `${biller_number_input_val}`;
+        const pb1 = document.getElementById('pb1');
+        pb1.classList.remove("hidden");
+        pb1.addEventListener('click', () => {
+            const pb2 = document.getElementById('pb2');
+            pb2.classList.remove("hidden");
+            pb1.classList.add("hidden");
+            const sample_form_inner = document.getElementById('sample_form'); // Renamed to avoid conflict with outer scope
+            sample_form_inner.classList.add("hidden");
+            const print = document.getElementById('printBtn');
+            print.addEventListener('click', function () {
+                printInvoice(invoice_input_val);
+                fetch(scriptURL, {
+                    method: 'POST',
+                    body: new FormData(form)
+                })
+                .then(response => {
+                    console.log("Form submitted successfully to Google Sheets");
+                    alert("Bill details are successfully sent to server (Google Sheets)....");
+                })
+                .catch(error => {
+                    console.error('Error submitting to Google Sheets!', error.message);
+                });
+
+                const invoiceData = {
+                    invoiceNumber: document.getElementById('invoice').value,
+                    date: document.getElementById('date_input').value,
+                    customerName: document.getElementById('biller_name_input').value,
+                    Contact: document.getElementById('biller_number_input').value,
+                    Aadhar: document.getElementById('biller_aadhar_input').value,
+                    GSTIN: document.getElementById('gst_name_input').value,
+                    City: document.getElementById('city').value,
+                    P_S: document.getElementById('P.S').value,
+                    P_O: document.getElementById('P.O').value,
+                    District: document.getElementById('dist').value,
+                    Pincode: document.getElementById('pincode').value,
+                    E_rickshaw: document.getElementById('car_details_input').value,
+                    Color: document.getElementById('color_input').value,
+                    Other_Details: document.getElementById('car_details_input2').value,
+                    Qty: document.getElementById('quantity_input').value,
+                    Chassis: document.getElementById('ch_input').value,
+                    amount: parseFloat(document.getElementById('gstinput').value)
+                };
+        
+                fetch('https://msenterprise.onrender.com/api/invoices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(invoiceData),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().catch(() => response.text()).then(errBody => {
+                            console.error("Error response body from MongoDB save:", errBody);
+                            throw new Error(`Failed to save invoice to MongoDB. Status: ${response.status}. Body: ${typeof errBody === 'string' ? errBody : JSON.stringify(errBody)}`);
+                        });
                     }
-                }
-            }
-            return tempWords;
-        }
-    }
-
-    // Fetch Google Sheets URL from backend (remains unchanged)
-    let scriptURL;
-    fetch('/config')
-        .then(response => response.json())
-        .then(config => {
-            scriptURL = config.googleSheetUrl;
-        })
-        .catch(err => console.error('Failed to fetch config:', err));
-
-    const actualFormElement = document.getElementById('sample_form');
-    const submitButton = document.getElementById('but');
-
-    if (submitButton && actualFormElement) {
-        submitButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            
-            // Validate form before proceeding
-            if (!actualFormElement.checkValidity()) {
-                actualFormElement.reportValidity();
-                return;
-            }
-
-            document.getElementById('sample_form').style.display = 'none';
-            document.getElementById('main_formm').style.display = 'block';
-
-            // Collect form data with correct IDs
-            const invoiceData = {
-                invoiceNumber: document.getElementById('invoice').value,
-                date: document.getElementById('date_input').value,
-                customerName: document.getElementById('biller_name_input').value,
-                Contact: document.getElementById('biller_number_input').value,
-                Aadhar: document.getElementById('biller_aadhar_input').value,
-                GSTIN: document.getElementById('gst_name_input').value,
-                City: document.getElementById('city').value,
-                P_S: document.getElementById('P.S').value,
-                P_O: document.getElementById('P.O').value,
-                District: document.getElementById('dist').value,
-                Pincode: document.getElementById('pincode').value,
-                E_rickshaw: document.getElementById('car_details_input').value, // Matches schema
-                Color: document.getElementById('color_input').value,
-                Other_Details: document.getElementById('car_details_input2').value,
-                Qty: document.getElementById('quantity_input').value,
-                Chassis: document.getElementById('ch_input').value,
-                amount: parseFloat(document.getElementById('gstinput').value) // Base amount
-            };
-
-            let baseAmount = invoiceData.amount;
-            let gstRate = 5; // 5% GST
-            let cgst = (baseAmount * (gstRate / 2)) / 100;
-            let sgst = cgst;
-            let totalAmount = baseAmount + cgst + sgst;
-            let totalGST = cgst + sgst;
-
-            // Update DOM with correct IDs
-            document.getElementById('date_output').textContent = new Date(invoiceData.date).toLocaleDateString('en-GB'); // Format date
-            document.getElementById('invoice_bill').textContent = invoiceData.invoiceNumber;
-            document.getElementById('biller_name').textContent = invoiceData.customerName;
-            document.getElementById('city_output').textContent = `${invoiceData.City}, P.O: ${invoiceData.P_O}, P.S: ${invoiceData.P_S}`;
-            document.getElementById('dist_output').textContent = invoiceData.District;
-            document.getElementById('pincode_output').textContent = invoiceData.Pincode;
-            document.getElementById('number_output').textContent = invoiceData.Contact;
-            document.getElementById('aadhar_output').textContent = invoiceData.Aadhar;
-            document.getElementById('gstname').textContent = invoiceData.GSTIN || 'NA';
-            document.getElementById('car_details').textContent = invoiceData.E_rickshaw;
-            document.getElementById('color').textContent = invoiceData.Color;
-            document.getElementById('ch_output').textContent = invoiceData.Chassis;
-            document.getElementById('other_output').innerHTML = invoiceData.Other_Details.replace(/\n/g, '<br>'); // Preserve newlines
-            document.getElementById('quantity_output').textContent = invoiceData.Qty;
-            
-            document.querySelectorAll('.basic_value').forEach(el => el.textContent = baseAmount.toFixed(2));
-            document.getElementById('subtotal').innerHTML = `<b>${baseAmount.toFixed(2)}</b>`;
-            document.querySelectorAll('.gst').forEach(el => el.textContent = cgst.toFixed(2)); // Assumes CGST and SGST are same and displayed similarly
-            
-            // Rounded off logic - current HTML has static +0.01. If it needs to be dynamic, this needs adjustment.
-            // For now, let's assume the totalAmount is the final one and rounding is for display only.
-            // const roundedOff = Math.round(totalAmount * 100)/100 - totalAmount; // Example if dynamic rounding needed
-            // document.getElementById('rounded').innerHTML = `<b>${roundedOff.toFixed(2)}</b>`;
-            document.getElementById('main_with_gst_value').textContent = totalAmount.toFixed(2);
-            document.getElementById('amount_word').textContent = ConvertNumberToWords(totalAmount);
-
-            // Update tax table section
-            document.getElementById('tgst').textContent = totalGST.toFixed(2);
-            // Assuming the HSN/SAC table's basic_value and gst also need update based on current invoice
-            const taxTableBasicValue = document.querySelector('.invoice-table-body td:nth-child(2)');
-            if (taxTableBasicValue) taxTableBasicValue.textContent = baseAmount.toFixed(2);
-            const taxTableCGSTAmount = document.querySelector('.invoice-table-body td:nth-child(4)');
-            if (taxTableCGSTAmount) taxTableCGSTAmount.textContent = cgst.toFixed(2);
-            const taxTableSGSTAmount = document.querySelector('.invoice-table-body td:nth-child(6)');
-            if (taxTableSGSTAmount) taxTableSGSTAmount.textContent = sgst.toFixed(2);
-            document.getElementById('basicword').textContent = ConvertNumberToWords(totalGST) + " Only";
-
-            // Save to Google Sheets (Corrected form ID)
-            if (scriptURL) {
-                fetch(scriptURL, { method: 'POST', body: new FormData(actualFormElement) })
-                    .then(response => console.log('Form submitted to Google Sheets'))
-                    .catch(error => console.error('Google Sheets error:', error));
-            } else {
-                console.warn('scriptURL for Google Sheets is not defined. Skipping Google Sheets submission.');
-            }
-
-            // Save to MongoDB (sending the more complete invoiceData)
-            // The backend schema expects 'amount' to be the total amount. Let's adjust.
-            const mongoPayload = {...invoiceData, amount: totalAmount }; 
-
-            fetch('/api/invoices', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mongoPayload) // Send the corrected and complete data
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data._id) { // Check if save was successful by looking for an _id
+                    return response.json();
+                })
+                .then(data => {
                     console.log('Invoice saved to MongoDB:', data);
-                    // Show Preview and Print buttons only after successful save
-                    const previewButtonContainer = document.getElementById('pb1');
-                    if (previewButtonContainer) previewButtonContainer.classList.remove('hidden');
-                    
-                    const printButtonContainer = document.getElementById('pb2');
-                    if (printButtonContainer) printButtonContainer.classList.remove('hidden');
-                } else {
-                    console.error('Error saving invoice to MongoDB:', data.message || data);
-                    alert('There was an error saving the invoice to the database. Please try again. Details: ' + (data.message || JSON.stringify(data)));
-                }
-            })
-            .catch(err => {
-                console.error('MongoDB save fetch error:', err);
-                alert('There was a network error saving the invoice. Please try again. Details: ' + err.message);
+                    alert('Invoice details also saved to database (MongoDB)!');
+                })
+                .catch(error => {
+                    console.error('Error saving invoice to MongoDB:', error);
+                    alert('Error saving invoice to database (MongoDB): ' + error.message);
+                });
             });
-
-            // Moved button visibility to after successful save
         });
-    } else {
-        console.error('Submit button or form not found. Script cannot proceed.');
-    }
+    });
+});
 
-    // PDF Generation (remains largely unchanged, ensure printBtn is correctly referenced if used here)
-    // The printBtn in HTML is id="printBtn", its container is id="pb2"
-    // The printInvoice function is globally exposed, so the button in HTML should be <button id='printBtn' onclick='printInvoice()' ...>
-    // Or, we add an event listener to it.
-    const printActualButton = document.getElementById('printBtn');
-    if(printActualButton){
-        printActualButton.addEventListener('click', printInvoice);
-    }
 
-    function printInvoice() {
-        const element = document.getElementById('main_formm');
-        // Temporarily hide buttons that shouldn't be in the PDF
-        const viewPreviousButton = document.getElementById('view_previous_invoices_btn');
-        const toolbar = document.querySelector('.toolbar');
-        let viewPreviousDisplayStyle, toolbarDisplayStyle;
 
-        if (viewPreviousButton) {
-            viewPreviousDisplayStyle = viewPreviousButton.style.display;
-            viewPreviousButton.style.display = 'none';
-        }
-        if (toolbar) {
-            toolbarDisplayStyle = toolbar.style.display;
-            toolbar.style.display = 'none';
-        }
 
-        html2pdf().from(element).set({
-            margin: [10, 10, 10, 10],
-            filename: 'invoice.pdf',
-            pagebreak: { mode: 'avoid-all', before: '.page-break' }, // Added a class for manual page breaks if needed
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        }).save().then(() => {
-            // Restore button visibility
-            if (viewPreviousButton) viewPreviousButton.style.display = viewPreviousDisplayStyle;
-            if (toolbar) toolbar.style.display = toolbarDisplayStyle;
-        }).catch(err => {
-            console.error('PDF generation error:', err);
-            // Restore button visibility even if error
-            if (viewPreviousButton) viewPreviousButton.style.display = viewPreviousDisplayStyle;
-            if (toolbar) toolbar.style.display = toolbarDisplayStyle;
-        });
-    }
+// --- Added by Manus for View Previous Invoices feature ---
+document.addEventListener("DOMContentLoaded", function () {
+    const viewButton = document.getElementById("view_previous_invoices_btn");
+    const invoicesContainer = document.getElementById("previous_invoices_container");
+    const invoicesList = document.getElementById("invoices_list");
 
-    // View Previous Invoices (remains unchanged)
-    const viewPreviousInvoicesLink = document.getElementById('view_previous_invoices_btn'); // Corrected ID from HTML
-    if (viewPreviousInvoicesLink) {
-        viewPreviousInvoicesLink.addEventListener('click', (e) => {
-            // e.preventDefault(); // It's an <a> tag, so prevent default if not wanting navigation yet
-            window.location.href = './previous_invoices.html';
+    if (viewButton && invoicesContainer && invoicesList) {
+        viewButton.addEventListener("click", async function () {
+            // Toggle visibility of the container
+            if (invoicesContainer.style.display === "none" || invoicesContainer.style.display === "") {
+                invoicesContainer.style.display = "block";
+                // Fetch and display invoices
+                try {
+                    const response = await fetch("https://msenterprise.onrender.com/api/invoices");
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const invoices = await response.json();
+                    
+                    invoicesList.innerHTML = ""; // Clear previous list
+
+                    if (invoices.length === 0) {
+                        const listItem = document.createElement("li");
+                        listItem.textContent = "No invoices found.";
+                        invoicesList.appendChild(listItem);
+                    } else {
+                        invoices.forEach(invoice => {
+                            const listItem = document.createElement("li");
+                            listItem.textContent = `Invoice #: ${invoice.invoiceNumber} - Customer: ${invoice.customerName} - Date: ${new Date(invoice.date).toLocaleDateString()} - Amount: ${invoice.amount}`;
+                            invoicesList.appendChild(listItem);
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error fetching invoices:", error);
+                    invoicesList.innerHTML = "<li>Error loading invoices. Please check the console.</li>";
+                }
+            } else {
+                invoicesContainer.style.display = "none";
+                invoicesList.innerHTML = ""; // Clear list when hiding
+            }
         });
     }
-
-    // Expose printInvoice globally if needed, though direct event listener is better
-    window.printInvoice = printInvoice; 
 });
 
