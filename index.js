@@ -106,6 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('total_value').textContent = total.toFixed(2);
         document.getElementById('amount_in_words').textContent = ConvertNumberToWords(total);
 
+        // Ensure View Previous Invoices button is visible
+        const viewPreviousButton = document.getElementById('view_previous_invoices');
+        if (viewPreviousButton) {
+            viewPreviousButton.style.display = 'block';
+        }
+
         // Save to Google Sheets
         fetch(scriptURL, { method: 'POST', body: new FormData(form) })
             .then(response => console.log('Form submitted to Google Sheets'))
@@ -136,24 +142,33 @@ document.addEventListener('DOMContentLoaded', () => {
     function printInvoice() {
         const element = document.getElementById('main_formm');
         const viewPrevious = document.getElementById('view_previous_invoices');
-        viewPrevious.style.display = 'none';
+        if (viewPrevious) {
+            viewPrevious.style.display = 'none';
+        }
         html2pdf().from(element).set({
             margin: [10, 10, 10, 10],
             filename: 'invoice.pdf',
             pagebreak: { mode: 'avoid-all' },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         }).save().then(() => {
-            viewPrevious.style.display = 'block';
+            if (viewPrevious) {
+                viewPrevious.style.display = 'block';
+            }
         }).catch(err => {
-            viewPrevious.style.display = 'block';
+            if (viewPrevious) {
+                viewPrevious.style.display = 'block';
+            }
             console.error('PDF generation error:', err);
         });
     }
 
     // View Previous Invoices
-    document.getElementById('view_previous_invoices').addEventListener('click', () => {
-        window.location.href = 'previous_invoices.html';
-    });
+    const viewPreviousButton = document.getElementById('view_previous_invoices');
+    if (viewPreviousButton) {
+        viewPreviousButton.addEventListener('click', () => {
+            window.location.href = 'previous_invoices.html';
+        });
+    }
 
     // Expose printInvoice globally for button onclick
     window.printInvoice = printInvoice;
