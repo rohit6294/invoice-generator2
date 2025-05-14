@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"
+        integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+        integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+    <!-- <div class="container" id="bb">
+        <div class="sub">
+            <h1>Login</h1>
+            <form class="form" id="loginForm">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit" id="passid">Login</button>
+            </form>
+        </div>
+    </div> -->
+
+
+    <a href="./previous_invoices.html" id="view_previous_invoices_btn" style="display: inline-block; margin-bottom: 10px; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; text-decoration: none;">View Previous Invoices</a>
+
+    <form class="mb-5 " id="sample_form" method="POST" name="google-sheet">
+
+        <input type="date" id="date_input" name="date" required>
+        <br>
+        <input type="number" placeholder="Enter the invoice number" id="invoice"
+            class="border  border-gray-400 rounded py-2 px-4 mb-2 focus:outline-none focus:border-blue-500"
+            name="Invoice_no" required>
+        <br>
+        <input type="number" name="gstinput" id="gstinput" placeholder="Enter the main value"
+            class="border  border-gray-400 rounded py-2 px-4 mb-2 focus:outline-none focus:border-blue-500"
+            name="Total_price" required>
+        <br>
+        <input type="text" id="biller_name_input" placeholder="Enter the biller name"
+            class="border  border-gray-400 rounded py-2 px-4 mb-2 focus:outline-none focus:border-blue-500"
+            name="Customer_name" required>
+        <br>
+        <input type="number" id="biller_number_input"  placeholder="Enter the biller number"
+            class="border  border-gray-400 rounded py-2 px-4 mb-2 focus:outline-none focus:border-blue-500" name="biller_number" required>
+        <br>
+        <input type="number" id="biller_aadhar_input"  placeholder="Enter the biller aadhar"
+            class="border  border-gray-400 rounded py-2 px-4 mb-2 focus:outline-none focus:border-blue-500" name="biller_aadhar" required>
+        <br>
+
+        <input type="text" id="gst_name_input" placeholder="Enter GSTIN"
+            class="border border-gray-400  rounded py-2 px-4 mb-2 focus:outline-none focus:border-blue-500"
+            name="GST_No" required>
+        <br>
+        <input type="text" id="city" placeholder="Enter the city"
+            class="border border-gray-400  rounded py-2 px-4 mb-2 focus:outline-none focus:border-blue-500" name="City" required>
+        <br>
+        <input type="text" id="P.S" placeholder="Enter the P.S"
+            class="border border-gray-400  rounded py-2 px-4 mb-2 focus:outline-none focus:border-blue-500" name="P.S" required>
+        <br>
+
+        <input type="text" id="P.O" placeholder="Enter the P.O"
+            class="border border-gray-400 rounded  py-2 px-4 mb-2 focus:outline-none focus:border-blue-500" name="P.O" required>
+        <br>
+        <input type="text" id="dist" placeholder="Enter the district"
+            class="border border-gray-400  rounded py-2 px-4 mb-2 focus:outline-none focus:border-blue-500"
+            name="Distric" required>
+        <br>
+        <input type="number" id="pincode" placeholder="Enter the pincode"
+            class="border border-gray-400  rounded py-2 px-4 mb-2 focus:outline-none focus-border-blue-500"
+            name="Pincode" required>
+        <br>
+        <textarea type="text" id="car_details_input" placeholder="Enter E-rickshaw name"
+            class="border border-gray-400  rounded py-2 px-4 mb-2 focus:outline-none focus-border-blue-500"
+            name="E-rickshaw_name" required></textarea>
+        <br>
+        <textarea type="text" id="car_details_input2" placeholder="Enter Other details"
+            class="border border-gray-400  rounded py-2 px-4 mb-2 focus:outline-none focus-border-blue-500"
+            name="Other_details" required></textarea>
+        <br>
+        <input type="number" id="quantity_input" placeholder="Enter quantity"
+            class="border border-gray-400  rounded py-2 px-4 mb-2 focus:outline-none focus-border-blue-500"
+            name="Quantity" required>
+        <br>
+        <input type="text" id="color_input" placeholder="Enter E-rickshaw color"
+            class="border border-gray-400  rounded py-2 px-4 mb-2 focus:outline-none focus-border-blue-500"
+            name="Color" required>
+        <br>
+        <input type="text" id="ch_input" style="width: 250px;" placeholder="Enter E-rickshaw chassis no."
+            class="border border-gray-400  rounded py-2 px-4 mb-2 focus:outline-none focus-border-blue-500"
+            name="Chassis_no" required>
+        <br>
+
+        <button id="but" type="submit" style="width: 90px;"
+            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            name="submit">Submit</button>
+            
+
+    </form>
+    <section class="" id="form_main">
+
+        <nav>
+            <div class='toolbar'>
+                <span class='btngroup hidden' id="pb1"><button id='previewBtn' class='btn' title="Preview Invoice"></button>Preview</span>
+                <span class='btngroup hidden' id="pb2"><button id='printBtn' class='btn' title="Print Invoice"></button>Print</span>
+
+            </div>
+
+        </nav>
+        <main id="main_formm"  style="margin-left: -10px;">
+
+            <h1 id="title" class="text-xl">Invoice</h1>
+
+            <div class="prehead">
+                <div class="info">Date: <span id="date_output"></span>
+                </div>
+                <div class="info">Invoice No. MS#<span id="invoice_bill">NaN</span></div>
+            </div>
+            <header style="padding-top: 10px; padding-bottom: 10px; width: 100%;">
+                <div class="address" style="width: 50%;">
+                    Seller:
+                    <br>
+                    <div>
+                        <label id="owner-name"> &emsp;&emsp;M S ENTERPRISE</label><br>
+                        <span id="owner-address">&emsp;&emsp;12/5 CHOWBAGA ROAD,KOLKATA-700039<br>&emsp;&emsp;BRANCH-
+                            MATHURAPURPUR SOUTH24 PGNS-
+                            &emsp;&emsp; 743354</span><br>
+                        <span id="owner-city">&emsp;&emsp;GSTIN/UIN : 19AREPB1784D1Z1</span><br>
+                        <span>&emsp;&emsp;STATE NAME : WEST BBENGAL</span> <br>
+                        <span>&emsp;&emsp;Sate Code : 19</span>
+                    </div>
+                </div>
+                <div class="address" style="border-left: 1px solid #0004; width: 50%;">
+                    Buyer (Bill to)
+                    <br>
+                    <div id="to">
+                        <span style="font-size:1.1rem;font-weight:400;">&emsp;&emsp;<span id="biller_name">Company
+                                Name</span></span><br>
+                        <span>&emsp;&emsp;<span id="city_output">City, P.O,P.S</span></span><br>
+                        <span>&emsp;&emsp;<span id="dist_output">district</span></span><br>
+                        <span>&emsp;&emsp;<span id="pincode_output">pincode</span></span><br>
+                        <span>&emsp;&emsp;Mob. No. +91 <span id="number_output">Mobile Number</span></span><br>
+                        <span>&emsp;&emsp;Aadhar No. <span id="aadhar_output">Aadhar Number</span></span><br>
+                        <span id="address">&emsp;&emsp;GSTIN/UIN : <span id="gstname">NA</span></span>
+                    </div>
+                </div>
+            </header>
+
+            <table class="lineitems">
+                <thead>
+                    <tr>
+                        <th>SL <br> No.</th>
+                        <th>Description of Goods</th>
+                        <th>HSN/SAC</th>
+                        <th>Quantity</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="sl">1</td>
+                        <td style=" padding-left: 55px;">
+                            <b><span><span id="car_details"></span> E-RICKSHAW (<span id="color">Colour</span>)</span>
+                                <br>
+                                <span>CHASSIS NO:- <span id="ch_output"></span></span>
+                                <br>
+                                <!-- <span>&emsp;&emsp;&emsp;&emsp;<span id="other_output"></span></span> -->
+                                <div id="other_output"></div>
+
+                            </b>
+                        </td>
+                        <td class="sl">
+                            870380
+                        </td>
+                        <td class="sl">
+                            <b><span id="quantity_output">NaN</span></b>
+                        </td>
+                        <td class="sl ">
+                            <span class="basic_value">NaN</span>
+                        </td>
+                        <td class="sl">
+                            <b> <span class="basic_value">NaN</span></b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="7">
+                            <table class="tally">
+                                <tr>
+                                    <td class="label"><b> Subtotal </b></td>
+                                    <td id="subtotal" class="basic_value"><b> NaN</b></td>
+                                </tr>
+                                <tr>
+                                    <td class="label"><b> CGST(2.5%) </b></td>
+                                    <td id="tax" class="gst"><b>NaN</b></td>
+                                </tr>
+                                <tr>
+                                    <td class="label"><b> SGST(2.5%) </b></td>
+                                    <td id="tax" class="gst"><b>NaN</b></td>
+                                </tr>
+                                <tr>
+                                    <td class="label"><b>ROUNDED OFF </b></td>
+                                    <td id="rounded"><b>+0.01 </b></td>
+                                </tr>
+                                <tr>
+                                    <td class="label"><b> Total</b></td>
+                                    <td><b> <span id="main_with_gst_value">NaN</span></b></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="width: 95%;">
+
+                <span>Amount Chargable(in words) :
+                    <br>
+                    <b><span id="amount_word">NaN</span></b>
+                </span>
+            </div>
+            <table class="invoice-table lineitems">
+                <thead class="invoice-table-header">
+                    <tr>
+                        <th rowspan="2">HSN/SAC</th>
+                        <th>Taxable</th>
+                        <th colspan="2">Central Tax</th>
+                        <th colspan="2">State Tax</th>
+                        <th>Total</th>
+                    </tr>
+                    <tr>
+
+                        <th>Value</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                        <th>Tax Amount</th>
+                    </tr>
+                </thead>
+                <tbody class="invoice-table-body">
+                    <tr>
+                        <td>870380</td>
+                        <td class="basic_value">4,03,809.52</td>
+                        <td>2.50%</td>
+                        <td class="gst">10,095.24</td>
+                        <td>2.50%</td>
+                        <td class="gst">10,095.24</td>
+                        <td id="tgst">20,190.48</td>
+                    </tr>
+                </tbody>
+
+            </table>
+            <div style="width: 95%;">
+
+                <span>Tax Amount (in words) :
+                    <br>
+                    <b><span id="basicword"> NaN </span></b>
+                </span>
+            </div>
+
+            <div style="width: 95%; margin-top: 5px; ">
+                <!-- <div style="float: left; width: 45%;">
+                    <span><u> <b>Declaration</b> </u>
+                        <br>
+                        We declare that this invoice shows the actual price of the <br> goods describe and that all
+                        particulars are true and correct.
+                    </span>
+                </div> -->
+
+                <div style="width: 45%; float: left;">
+                    <div style=" padding: 2px;  border: 1px solid black; text-align: left;">
+
+                        <span style="font-size: 17px;"><b> Customer Signature </b></span>
+                        <br><br>
+                        <span style="padding-right: 15px; font-size: small;">Signature</span>
+                    </div>
+                    <div>
+                        <span ><b>Declaration</b>
+                            <br>
+                            <span style="font-size: 10px; display: block; line-height: 10px;">
+
+                                We declare that this invoice shows the actual price of the goods describe and that all
+                                particulars are true and correct.
+                            </span>
+                        </span>
+
+                    </div>
+                </div>
+                <div style="width: 45%; float: right; padding: 2px;  border: 1px solid black; text-align: right;">
+                    <span style="font-size: 17px;"><b> For M S ENTERPRISE </b></span>
+                    <br><br><br><br>
+                    <span style="padding-right: 15px; font-size: small;">Authorized Signatory</span>
+                </div>
+
+            </div>
+
+
+        </main>
+
+    </section>
+
+
+
+</body>
+<script src="./index.js"></script>
+<script src="./login.js"></script>
+
+
+</html>
